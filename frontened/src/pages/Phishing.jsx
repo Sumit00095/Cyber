@@ -3,6 +3,7 @@ import axios from "axios";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
+import "./Phishing.css";
 
 function Phishing() {
   const [input, setInput] = useState("");
@@ -32,12 +33,16 @@ function Phishing() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Unable to analyze. Check whether the backend is running."
+          "Unable to analyze. Check whether the backend is running."
       );
     } finally {
       setLoading(false);
     }
   };
+
+  const riskClass = result?.riskLevel
+    ? String(result.riskLevel).toLowerCase().replace(/\s+/g, "-")
+    : "";
 
   return (
     <div className="dashboard-container">
@@ -46,87 +51,178 @@ function Phishing() {
       <div className="main-content">
         <Topbar />
 
-        <div className="page-content">
-          <h1>AI Phishing Detection</h1>
-          <p>
-            Analyze suspicious URLs and messages for potential
-            phishing indicators.
-          </p>
+        <div className="phishing-content">
+          {/* Page Header */}
+          <div className="phishing-header">
+            <div className="phishing-heading-icon">🛡️</div>
 
-          <form onSubmit={analyzeInput}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste a suspicious URL or message here..."
-              rows={6}
-              style={{
-                width: "100%",
-                maxWidth: "750px",
-                padding: "14px",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-                display: "block",
-                marginBottom: "15px"
-              }}
-            />
+            <div>
+              <h1>AI Phishing Detection</h1>
+              <p>
+                Analyze suspicious URLs and messages for potential
+                phishing indicators.
+              </p>
+            </div>
+          </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Analyzing..." : "Analyze for Phishing"}
-            </button>
-          </form>
+          {/* Input Card */}
+          <div className="phishing-card">
+            <div className="phishing-card-heading">
+              <h2>Analyze Suspicious Content</h2>
+              <span className="analysis-tag">Security Analysis</span>
+            </div>
 
-          {error && (
-            <p style={{ color: "red", marginTop: "15px" }}>
-              {error}
+            <p className="phishing-description">
+              Enter a suspicious URL, email, or message below to
+              check for possible phishing activity.
             </p>
-          )}
 
+            <form onSubmit={analyzeInput}>
+              <label htmlFor="phishing-input">
+                URL or Message
+              </label>
+
+              <textarea
+                id="phishing-input"
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  setError("");
+                }}
+                placeholder="Paste a suspicious URL or message here..."
+                rows={6}
+              />
+
+              <div className="phishing-input-footer">
+                <span>
+                  {input.length} characters
+                </span>
+
+                <button
+                  type="button"
+                  className="clear-btn"
+                  onClick={() => {
+                    setInput("");
+                    setResult(null);
+                    setError("");
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="analyze-btn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <span>🔍</span>
+                    Analyze for Phishing
+                  </>
+                )}
+              </button>
+            </form>
+
+            {error && (
+              <div className="phishing-error">
+                <span>⚠️</span>
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* Analysis Results */}
           {result && (
-            <div
-              style={{
-                marginTop: "25px",
-                padding: "20px",
-                border: "1px solid #ddd",
-                borderRadius: "10px",
-                maxWidth: "750px"
-              }}
-            >
-              <h2>Analysis Results</h2>
+            <div className="phishing-result-card">
+              <div className="result-header">
+                <div>
+                  <h2>Analysis Results</h2>
+                  <p>Security assessment completed</p>
+                </div>
 
-              <p>
-                <strong>Detection method:</strong>{" "}
-                {result.analysisType}
-              </p>
+                <span className={`risk-badge ${riskClass}`}>
+                  {result.riskLevel}
+                </span>
+              </div>
 
-              <p>
-                <strong>Risk score:</strong>{" "}
-                {result.riskScore}/100
-              </p>
+              <div className="result-stats">
+                <div className="result-stat">
+                  <span className="stat-label">
+                    Detection Method
+                  </span>
+                  <h3>{result.analysisType || "N/A"}</h3>
+                </div>
 
-              <p>
-                <strong>Risk level:</strong>{" "}
-                {result.riskLevel}
-              </p>
+                <div className="result-stat">
+                  <span className="stat-label">
+                    Risk Score
+                  </span>
+                  <h3>{result.riskScore}/100</h3>
+                </div>
 
-              <h3>Indicators</h3>
+                <div className="result-stat">
+                  <span className="stat-label">
+                    Risk Level
+                  </span>
+                  <h3>{result.riskLevel}</h3>
+                </div>
+              </div>
 
-              {result.indicators?.length ? (
-                <ul>
-                  {result.indicators.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No suspicious indicators were detected.</p>
-              )}
+              {/* Risk Score Progress */}
+              <div className="risk-progress-section">
+                <div className="risk-progress-label">
+                  <span>Risk Score</span>
+                  <span>{result.riskScore}%</span>
+                </div>
 
-              <h3>Recommendation</h3>
-              <p>{result.recommendation}</p>
+                <div className="risk-progress-track">
+                  <div
+                    className={`risk-progress-fill ${riskClass}`}
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.max(0, Number(result.riskScore) || 0)
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
 
-              <p style={{ fontSize: "13px", color: "#777" }}>
+              {/* Indicators */}
+              <div className="result-section">
+                <h3>🔎 Indicators</h3>
+
+                {result.indicators?.length ? (
+                  <ul className="indicator-list">
+                    {result.indicators.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="no-indicators">
+                    No suspicious indicators were detected.
+                  </p>
+                )}
+              </div>
+
+              {/* Recommendation */}
+              <div className="recommendation-section">
+                <h3>💡 Recommendation</h3>
+                <p>{result.recommendation}</p>
+              </div>
+
+              <div className="result-disclaimer">
+                <span>ℹ️</span>
                 This is an initial rule-based assessment, not a
                 guarantee that a URL or message is safe.
-              </p>
+              </div>
             </div>
           )}
         </div>
