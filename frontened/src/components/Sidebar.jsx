@@ -1,53 +1,92 @@
-import { NavLink } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   ShieldAlert,
   Bell,
   FileText,
-  LogOut
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
+  const menuItems = [
+    {
+      path: "/dashboard",
+      name: "Dashboard",
+      icon: <LayoutDashboard size={20} />,
+    },
+    {
+      path: "/threats",
+      name: "Threats",
+      icon: <ShieldAlert size={20} />,
+    },
+    {
+      path: "/alerts",
+      name: "Alerts",
+      icon: <Bell size={20} />,
+    },
+    {
+      path: "/reports",
+      name: "Reports",
+      icon: <FileText size={20} />,
+    },
+    {
+      path: "/phishing",
+      name: "AI Phishing Detection",
+      icon: <ShieldCheck size={20} />,
+    },
+  ];
+
   return (
     <aside className="sidebar">
 
+      {/* Brand */}
       <div className="brand">
-        🛡️ CyberShield
+        <div className="brand-icon">
+          <ShieldCheck size={26} />
+        </div>
+
+        <div>
+          <h2>CyberShield</h2>
+          <span>Security Management</span>
+        </div>
       </div>
 
-      <nav>
+      {/* Navigation */}
+      <nav className="sidebar-nav">
 
-        <NavLink to="/dashboard">
-          <LayoutDashboard size={20} />
-          Dashboard
-        </NavLink>
+        <p className="nav-heading">MAIN MENU</p>
 
-        <NavLink to="/threats">
-          <ShieldAlert size={20} />
-          Threats
-        </NavLink>
-
-        <NavLink to="/alerts">
-          <Bell size={20} />
-          Alerts
-        </NavLink>
-
-        <NavLink to="/reports">
-          <FileText size={20} />
-          Reports
-        </NavLink>
-        <Link to="/phishing">
-  <span>🛡️</span>
-  <span>AI Phishing Detection</span>
-</Link>
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            {item.icon}
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
 
       </nav>
 
-      <button className="logout" onClick={() => window.location.href = "/"}>
-        <LogOut size={20} />
-        Logout
-      </button>
+      {/* Logout */}
+      <div className="sidebar-bottom">
+        <button className="logout" onClick={handleLogout}>
+          <LogOut size={20} />
+          <span>Logout</span>
+        </button>
+      </div>
 
     </aside>
   );
