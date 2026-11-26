@@ -15,7 +15,7 @@ const aiAlertRoutes = require("./routes/aiAlertRoutes");
 
 const app = express();
 
-app.use(cors({ origin: "https://onrender.com" }));
+app.use(cors({ origin: "https://cyber-2-t482.onrender.com" }));
 
 app.use(express.json());
 
