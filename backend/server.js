@@ -15,7 +15,7 @@ const aiAlertRoutes = require("./routes/aiAlertRoutes");
 
 const app = express();
 
-app.use(cors({ origin: "https://cyber-2-t482.onrender.com" }));
+app.use(cors({ origin: "https://onrender.com" }));
 
 app.use(express.json());
 
@@ -24,6 +24,7 @@ app.get("/", (req, res) => {
     message: "CyberShield Backend is running!"
   });
 });
+
 app.use("/api/phishing", phishingRoutes);
 app.use("/api/ai-alerts", aiAlertRoutes);
 app.use("/api/auth", authRoutes);
@@ -32,17 +33,12 @@ app.use("/api/alerts", alertRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-async function startServer() {
-  try {
-    await connectDB();
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://0.0.0:${PORT}`);
+});
 
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start backend:", error.message);
-    process.exit(1);
-  }
-}
-
-startServer();
+connectDB()
+  .then(() => console.log("MongoDB connected"))
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error.message);
+  });
